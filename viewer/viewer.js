@@ -2,7 +2,7 @@
    e-book 뷰어 — WBS 4.1 / 4.3
    교사가 쓰는 화면. 절대 요구 = 수업 흐름이 끊기지 않는 것.
 
-   불러오기 3가지
+   불러오기 4가지 (4번 = 번들: 「완성본 바로 보기.html」, window.EBOOK_BUNDLE)
      1) 저작기 「교사 화면으로 보기」 — 창끼리 postMessage 로 프로젝트·지면 이미지·자료 파일을 받는다
      2) 이북 폴더 열기 — .ebproj.json(또는 book.json+pages+profiles) + 지면 폴더 + 자료가 든 폴더
      3) 주소 ?book=<.ebproj.json 또는 book.json 이 있는 폴더 URL> — 웹에 올렸을 때(엠티처 이관 후)
@@ -100,6 +100,13 @@ function linkFromText(txt) {
 }
 async function primeLinks() {
   V.links.clear();
+  if (V.bundle) {                      // file:// 은 파일 내용을 fetch 로 못 읽으므로 바로가기 주소를 미리 넣어 둔다
+    Object.keys(V.pages).forEach(i => buttonsOf(+i).forEach(b => {
+      const p = b.asset && b.asset.path, nm = p && p.split("/").pop();
+      if (nm && V.bundle.links[nm]) V.links.set(p, V.bundle.links[nm]);
+    }));
+    return;
+  }
   const paths = new Set();
   Object.keys(V.pages).forEach(i => buttonsOf(+i).forEach(b => { if (b.asset && /\.url$/i.test(b.asset.path || "")) paths.add(b.asset.path); }));
   for (const p of paths) {
@@ -166,6 +173,14 @@ async function loadFolder(fileList) {
   if (miss) toast(`지면 이미지 ${miss}장을 찾지 못했습니다 — 지면 폴더가 이 폴더 안에 있는지 확인하세요`, 4000);
 }
 
+/* 4) 번들 — 「완성본 바로 보기.html」이 window.EBOOK_BUNDLE 로 넘겨 주는 완성본. 설치·폴더 고르기 없이 더블클릭만으로 열림 */
+function loadBundle(B) {
+  V.bundle = { files: new Set(B.files || []), assetBase: B.assetBase, links: B.links || {} };
+  V.files.clear(); V.names.clear(); V.base = null; V.bg = {};
+  (B.project.book.pages || []).forEach(e => { V.bg[e.index] = B.pageBase + e.master + ".webp"; });
+  setProject(B.project, "bundle");
+}
+
 /* 3) 주소 */
 async function loadUrl(u) {
   const url = new URL(u, location.href);
@@ -221,6 +236,41 @@ const printed = idx => {
 };
 const aspectOf = idx => { const e = (V.book.pages || []).find(p => p.index === idx); return (e && e.aspect) || 0.764; };
 
+/* 지면 그림 — 2291×3000 원본을 <img> 로 그대로 화면에 올리면 일부 크롬(GPU)에서 가장자리에 색 덩어리가 생겨서,
+   화면 픽셀 크기의 canvas 에 한 번 그려서 보여 준다 (줄이는 방식은 <img> 와 같아 화질 차이 없음). 실패하면 예전처럼 <img> */
+const PIC = new Map();                       // 쪽 → 불러온 Image (최근 6쪽만 보관)
+function plainImg(host, idx) {
+  host.insertAdjacentHTML("afterbegin", `<img class="bg" src="${V.bg[idx]}" alt="${printed(idx)}쪽" draggable="false">`);
+}
+function paintBg(host, idx, wpx, hpx) {
+  const dpr = Math.max(window.devicePixelRatio || 1, 1);
+  const tw = Math.max(1, Math.round(wpx * dpr)), th = Math.max(1, Math.round(hpx * dpr));
+  const cv = document.createElement("canvas");
+  cv.className = "bg"; cv.width = tw; cv.height = th;
+  cv.setAttribute("role", "img"); cv.setAttribute("aria-label", printed(idx) + "쪽");
+  host.appendChild(cv);
+  const fail = () => { if (cv.isConnected) { cv.remove(); plainImg(host, idx); } };
+  const draw = im => {
+    try {
+      /* 실제 칸 크기(테두리 뺀 것)에 정확히 맞춘다 — 1픽셀이라도 다르면 브라우저가 다시 늘려서 흐려진다 */
+      const cw = Math.round((host.clientWidth || wpx) * dpr), ch = Math.round((host.clientHeight || hpx) * dpr);
+      if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
+      const x = cv.getContext("2d"); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
+      x.drawImage(im, 0, 0, cv.width, cv.height);
+    } catch (_) { fail(); }
+  };
+  let im = PIC.get(idx);
+  if (im && im.complete && im.naturalWidth) { PIC.delete(idx); PIC.set(idx, im); Promise.resolve().then(() => draw(im)); return; }
+  im = new Image();
+  im.onload = () => {
+    PIC.set(idx, im);
+    while (PIC.size > 6) PIC.delete(PIC.keys().next().value);
+    draw(im);
+  };
+  im.onerror = fail;
+  im.src = V.bg[idx];
+}
+
 function render() {
   if (!V.book) return;
   const vp = viewPages();
@@ -236,7 +286,7 @@ function render() {
     pg.className = "page" + (idx == null ? " blank" : "");
     pg.style.width = Math.floor(h * ars[k]) + "px"; pg.style.height = h + "px";
     if (idx != null) {
-      if (V.bg[idx]) pg.innerHTML = `<img class="bg" src="${V.bg[idx]}" alt="${printed(idx)}쪽" draggable="false">`;
+      if (V.bg[idx]) paintBg(pg, idx, Math.floor(h * ars[k]), h);
       const layer = document.createElement("div"); layer.className = "layer";
       buttonsOf(idx).forEach(b => layer.appendChild(btnEl(b, h, idx)));
       pg.appendChild(layer);
@@ -276,6 +326,10 @@ function btnEl(b, pageH, idx) {
 /* ---------------------------------------------------------------- 4.3 하이브리드 자료 열기 */
 function embeddedOf(path) {
   if (!path) return null;
+  if (V.bundle) {                      // 완성본 바로 보기 — 자료는 같은 폴더 안 파일을 상대경로로 가리킨다 (file:// 에서도 열림)
+    const nm = path.split("/").pop();
+    return V.bundle.files.has(nm) ? { url: V.bundle.assetBase + encodeURIComponent(nm) } : null;
+  }
   if (V.files.has(path)) return { file: V.files.get(path) };
   const name = path.split("/").pop();
   // 경로 끝이 같은 파일 → 이름만 같은 파일 순서로
@@ -370,6 +424,16 @@ const KIND = ext => {
 async function present(label, r, asset) {
   const dl = $("#m-dl"), nw = $("#m-new");
   dl.hidden = true; nw.hidden = true;
+  if (r.how === "cms" && A.mode === "dev") {
+    /* 엠티처 도메인 밖에서는 CMS 화면을 창 안에 끼우면 로그인 쿠키가 안 실려 오류가 난다 → 새 창으로 연다 (누르는 순간 연 창이라 팝업도 안 막힘) */
+    const emb = r.emb;
+    showModal(label, `<span class="src cms">CMS 최신본</span>`,
+      `<div class="m-msg"><b>CMS 최신본으로 열 수 있어요</b>엠티처에 로그인되어 있어야 합니다.<br><br>` +
+      `<a class="big-btn" href="${esc(r.url)}" target="_blank" rel="noopener">웹에서 보기</a>` +
+      (emb ? `<br><br><button type="button" class="mb" id="m-to-emb">컴퓨터에서 열기</button>` : "") + `</div>`);
+    if (emb) { const t = $("#m-to-emb"); if (t) t.onclick = () => present(label, { how: "embedded", emb, fellBack: false }, asset); }
+    return;
+  }
   if (r.how === "cms") {
     showModal(label, `<span class="src cms">CMS 최신본</span>`,
       `<iframe src="${esc(r.url)}" title="${esc(label)}" allow="autoplay; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>`);
@@ -493,6 +557,7 @@ function bind() {
 function init() {
   bind();
   const q = new URLSearchParams(location.search).get("book");
+  if (window.EBOOK_BUNDLE) { $("#open").hidden = true; try { loadBundle(window.EBOOK_BUNDLE); } catch (err) { $("#open").hidden = false; $("#open-msg").textContent = err.message; } return; }
   if (listenPreview()) { $("#open").hidden = true; $("#book-title").textContent = "생성기에서 불러오는 중…"; return; }
   if (q) { loadUrl(q).catch(err => { $("#open").hidden = false; $("#open-msg").textContent = "불러오지 못했습니다: " + err.message; }); return; }
   $("#open").hidden = false;
