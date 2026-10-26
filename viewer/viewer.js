@@ -127,7 +127,7 @@ function listenPreview() {
       setProject(d.project, "preview");
       const at = d.goto ? +d.goto : null;
       if (at) goToIndex(at);
-      toast("저작기에서 연 미리보기입니다 — 저작기에서 고치면 다시 「교사 화면으로 보기」");
+      toast("생성기에서 연 미리보기입니다 — 생성기에서 고치면 다시 「교사 화면으로 보기」");
     } catch (err) { $("#open-msg").textContent = err.message; }
   });
   let n = 0;
@@ -493,7 +493,7 @@ function bind() {
 function init() {
   bind();
   const q = new URLSearchParams(location.search).get("book");
-  if (listenPreview()) { $("#open").hidden = true; $("#book-title").textContent = "저작기에서 불러오는 중…"; return; }
+  if (listenPreview()) { $("#open").hidden = true; $("#book-title").textContent = "생성기에서 불러오는 중…"; return; }
   if (q) { loadUrl(q).catch(err => { $("#open").hidden = false; $("#open-msg").textContent = "불러오지 못했습니다: " + err.message; }); return; }
   $("#open").hidden = false;
 }
