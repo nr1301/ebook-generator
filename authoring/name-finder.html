@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자료 이름 찾기 — e-book 생성기</title>
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --line:#2a2f3a;
+  --ink:#e8eaf0; --ink-dim:#9aa3b5; --accent:#5b8cff; --ok:#3ecf8e; --warn:#ffc857; --bad:#ff6b6b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{font-weight:700}.brand small{font-weight:400;color:var(--ink-dim);margin-left:6px}
+header a{color:var(--ink-dim);font-size:13px;margin-left:auto}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 60px;display:grid;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px}
+h2{margin:0;font-size:15px}
+.muted{color:var(--ink-dim);font-size:13px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.step{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:12px 14px;display:grid;gap:8px;align-content:start}
+.step b{font-size:13px;color:var(--ink-dim)}
+.t{background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;display:inline-block}
+.t:hover{border-color:#3a4252;background:#232833}
+.t.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.t:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=number]{width:72px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.val{font-size:13px}.val.ok{color:var(--ok)}.val.warn{color:var(--warn)}
+.bar{height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.sum{display:flex;gap:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer;background:var(--panel-2)}
+.chip[aria-pressed=true]{border-color:var(--accent);background:#22304f}
+.chip .n{font-weight:700;margin-left:4px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--ink-dim);font-weight:600;font-size:12px;white-space:nowrap;position:sticky;top:0;background:var(--panel)}
+td.f{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.why{color:var(--ink-dim);max-width:300px}
+td.new{font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:nowrap}
+select{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:3px 4px}
+.pill{display:inline-block;border-radius:999px;padding:0 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.high{background:#173a2b;color:var(--ok)}.pill.mid{background:#3a3218;color:var(--warn)}.pill.low{background:#3d1f22;color:var(--bad)}
+.pill.rule{background:#1d2a45;color:#9db8ff}.pill.wait{background:var(--panel-2);color:var(--ink-dim)}
+.cands{display:flex;gap:4px;flex-wrap:wrap}
+.cands button{border:1px solid var(--line);background:var(--panel-2);border-radius:5px;padding:0 7px;cursor:pointer;font-size:12px}
+.cands button.on{border-color:var(--accent);color:#fff;background:#22304f}
+tr.need td{background:rgba(255,200,87,.04)}
+.foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#22304f;border:1px solid var(--accent);padding:8px 16px;border-radius:8px;display:none}
+.toast.on{display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">자료 이름 찾기<small>e-book 생성기 · 파일 이름 규칙 없이 쪽 찾기</small></span>
+  <a href="index.html">저작기로 돌아가기</a>
+</header>
+<main>
+  <section class="card">
+    <h2>파일 이름에 쪽번호가 없어도 괜찮아요</h2>
+    <p class="muted">자료 내용을 교과서 지면과 맞춰 보고 몇 쪽의 어떤 자료인지 찾아 드려요. 확실한 것은 바로 정하고, 애매한 것만 골라 달라고 합니다. 끝나면 규칙 이름(<code>15_WS_수행평가 활동지.hwp</code>)으로 복사해 두면 「자료 폴더로 초안 만들기」에 그대로 쓸 수 있어요.</p>
+    <div class="steps">
+      <div class="step"><b>① 지면 폴더</b>
+        <label class="t">지면 폴더 고르기<input type="file" id="in-pages" webkitdirectory directory multiple hidden></label>
+        <span class="val" id="pages-val">교과서 PDF로 만든 「…_지면」 폴더</span>
+        <div class="row" id="first-row" hidden><label for="in-first">첫 지면의 교과서 쪽번호</label><input type="number" id="in-first" min="1" max="999"></div>
+      </div>
+      <div class="step"><b>② 자료 폴더</b>
+        <label class="t">자료 폴더 고르기<input type="file" id="in-docs" webkitdirectory directory multiple hidden></label>
+        <span class="val" id="docs-val">이름이 아무렇게나 붙은 자료도 됩니다</span>
+      </div>
+      <div class="step"><b>③ 찾기</b>
+        <button class="t primary" id="btn-run" disabled>쪽 찾기 시작</button>
+        <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+        <span class="val" id="run-val">지면과 자료를 고르면 시작할 수 있어요</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="res" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>찾은 결과</h2>
+      <div class="sum" role="group" aria-label="보기">
+        <button class="chip" data-f="must" aria-pressed="true">쪽을 정해 주세요<span class="n" id="n-must">0</span></button>
+        <button class="chip" data-f="check" aria-pressed="false">맞는지 봐 주세요<span class="n" id="n-check">0</span></button>
+        <button class="chip" data-f="ok" aria-pressed="false">확실함<span class="n" id="n-ok">0</span></button>
+        <button class="chip" data-f="all" aria-pressed="false">전체<span class="n" id="n-all">0</span></button>
+      </div>
+    </div>
+    <p class="muted" id="res-note"></p>
+    <div class="tbl"><table><thead><tr><th>지금 이름</th><th>쪽</th><th>후보</th><th>종류</th><th>확신</th><th>근거</th><th>새 이름</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="foot">
+      <button class="t primary" id="btn-save" disabled>규칙 이름으로 복사해 저장…</button>
+      <span class="muted" id="save-val">원본은 그대로 두고, 고른 폴더에 새 이름으로 복사합니다. 「맞는지 봐 주세요」는 지금 값 그대로 저장돼요.</span>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/pdf.worker.min.js"></script>
+<script src="vendor/opencv.js"></script>
+<script src="guess-read.js"></script>
+<script src="guess-match.js"></script>
+<script src="guess.js"></script>
+<script src="guess-run.js"></script>
+<script src="name-finder.js"></script>
+</body>
+</html>

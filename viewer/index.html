@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>e-book 뷰어</title>
+<link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+<header id="bar">
+  <div class="title"><span id="book-title">e-book 뷰어</span><span id="book-sub" class="sub"></span></div>
+  <div class="right">
+    <span id="net" class="net" hidden></span>
+    <button id="btn-settings" class="ib" title="설정" aria-label="설정">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="stage">
+  <div id="spread"></div>
+  <button id="nav-prev" class="nav" aria-label="이전 쪽">‹</button>
+  <button id="nav-next" class="nav" aria-label="다음 쪽">›</button>
+</main>
+
+<footer id="foot">
+  <input type="range" id="slider" min="0" max="0" value="0" aria-label="쪽 이동">
+  <span class="goto"><input type="number" id="goto" aria-label="쪽 번호"> 쪽 <span id="pageinfo" class="sub"></span></span>
+</footer>
+
+<section id="open" class="panel">
+  <div class="card">
+    <h1>e-book 뷰어</h1>
+    <p>이북 폴더를 여세요. 저작기에서 저장한 <b>.ebproj.json</b> 과 <b>지면 폴더</b>, <b>자료 파일</b>이 들어 있는 폴더입니다.</p>
+    <label class="big-btn">이북 폴더 열기<input type="file" id="in-folder" webkitdirectory directory multiple hidden></label>
+    <p class="sub">저작기에서 「교사 화면으로 보기」를 누르면 이 화면 없이 바로 열립니다.</p>
+    <p id="open-msg" class="warn"></p>
+  </div>
+</section>
+
+<div id="modal" hidden>
+  <div class="m-box" role="dialog" aria-modal="true">
+    <div class="m-head">
+      <span id="m-title"></span>
+      <span id="m-src" class="src"></span>
+      <span class="grow"></span>
+      <a id="m-dl" class="mb" download hidden>받기</a>
+      <a id="m-new" class="mb" target="_blank" rel="noopener" hidden>새 창</a>
+      <button id="m-close" class="mb" aria-label="닫기">닫기</button>
+    </div>
+    <div id="m-body"></div>
+  </div>
+</div>
+
+<div id="settings" hidden>
+  <div class="s-box">
+    <h3>설정</h3>
+    <label class="sw"><input type="checkbox" id="s-embedded"> 항상 내장본으로 열기 <span class="sub">— 학교 인터넷이 느릴 때</span></label>
+    <div id="s-dev">
+      <h4>개발용 <span class="sub">(엠티처로 옮기면 사라짐)</span></h4>
+      <label class="sw"><input type="checkbox" id="s-login"> 교사 로그인 상태로 보기</label>
+      <label class="row">네트워크
+        <select id="s-net">
+          <option value="auto">실제로 확인</option>
+          <option value="online">온라인 가정</option>
+          <option value="offline">오프라인 가정</option>
+          <option value="slow">느림 (1.5초 초과)</option>
+        </select>
+      </label>
+    </div>
+    <div class="s-foot"><button id="s-close" class="mb">닫기</button></div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script src="../common/mteacher-adapter.js"></script>
+<script src="viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>e-book 저작기</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <div class="brand">e-book 저작기 <span class="ver">v0.8 · schema v0.1</span></div>
+  <div class="tools">
+    <button id="btn-new" class="t">새 프로젝트</button>
+    <button id="btn-open" class="t">열기</button>
+    <button id="btn-save" class="t primary">저장</button>
+    <label class="t file" title="저장해 둔 지면 폴더(PDF이름_지면)를 다시 붙입니다">지면 폴더 불러오기<input type="file" id="in-pipeline" webkitdirectory directory multiple hidden></label>
+    <span class="sep"></span>
+    <label class="t file accent" title="자료를 모아 둔 폴더를 고르면 쪽마다 버튼을 붙입니다. 이름 앞에 쪽번호가 있으면 그대로(16_WS_탐구 활동지.hwp → 16쪽), 없으면 내용·그림으로 쪽을 찾아 봐요">📂 자료 폴더로 초안 만들기<input type="file" id="in-draft" webkitdirectory directory multiple hidden></label>
+    <button id="btn-preview" class="t" title="지금 작업을 교사용 뷰어로 엽니다">👁 교사 화면으로 보기</button>
+    <span class="sep"></span>
+    <button id="btn-undo" class="t" title="Ctrl+Z">실행취소</button>
+    <button id="btn-redo" class="t" title="Ctrl+Shift+Z">다시실행</button>
+    <details id="more" class="more">
+      <summary class="t">더보기 ▾</summary>
+      <div class="menu" id="more-menu">
+        <a class="t" href="name-finder.html" target="_blank" title="파일 이름에 쪽번호가 없는 자료를 내용으로 찾아 규칙 이름으로 바꿔 줍니다 (시험 기능)">🔎 자료 이름 찾기 (쪽번호 없는 자료)</a>
+        <button id="btn-export" class="t" title="book.json · pages · profiles 로 내려받기">스키마 파일로 내보내기</button>
+        <label class="t file">배경 이미지 직접 넣기<input type="file" id="in-bg" accept="image/*" multiple hidden></label>
+        <label class="t file">프로파일 바꾸기<input type="file" id="in-profile" accept=".json" hidden></label>
+      </div>
+    </details>
+    <span class="sep"></span>
+    <span id="status" class="status">준비됨</span>
+  </div>
+</header>
+
+<main id="app">
+  <aside id="palette">
+    <div class="pane-title">버튼 팔레트 <span id="profile-name" class="muted"></span></div>
+    <div class="hint">지면 위로 끌어다 놓으세요</div>
+    <div id="palette-list"></div>
+    <div class="pane-title">전역 버튼</div>
+    <div id="global-list" class="global"></div>
+  </aside>
+
+  <section id="stage-wrap">
+    <div id="spread-nav">
+      <button id="nav-prev" class="t">◀</button>
+      <span id="spread-label">—</span>
+      <button id="nav-next" class="t">▶</button>
+      <span class="sep"></span>
+      <label class="chk"><input type="checkbox" id="chk-grid"> 격자</label>
+      <label class="chk"><input type="checkbox" id="chk-safe" checked> 경계</label>
+      <span class="sep"></span>
+      <span id="page-size-note" class="muted"></span>
+    </div>
+    <div id="pagetype-bar"></div>
+    <div id="stage">
+      <div id="spread">
+        <div class="page" data-side="L"><div class="page-bg"></div><div class="layer"></div><div class="page-no"></div></div>
+        <div class="page" data-side="R"><div class="page-bg"></div><div class="layer"></div><div class="page-no"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <aside id="inspector">
+    <div class="pane-title">속성</div>
+    <div id="insp-empty" class="hint">객체를 선택하세요</div>
+    <div id="insp-body" hidden></div>
+    <div class="pane-title">검증 <span id="validate-sum" class="muted"></span></div>
+    <div id="validate" class="validate"></div>
+  </aside>
+</main>
+
+<div id="drop-veil" hidden><div>자료 파일을 지면 위에 놓으세요</div></div>
+<div id="modal-root"></div>
+<input type="file" id="in-open" accept=".json" hidden>
+
+<script src="profile.default.js"></script>
+<script src="profile.info1.js"></script>  <!-- 중학 정보 프로파일 — 마법사 교과 카드 -->
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/pdf.worker.min.js"></script>  <!-- file:// 에서 Worker 가 막혀 메인 스레드로 돌림 -->
+<script src="../common/mteacher-adapter.js"></script>
+<script src="app.js"></script>
+<script src="pdf-ingest.js"></script>
+<script src="wizard.js"></script>
+<script src="guess-read.js"></script>   <!-- v0.9 쪽 찾기 — 아래 다섯 줄을 지우면 초안 만들기는 쪽번호 있는 파일만 붙인다 -->
+<script src="guess-match.js"></script>  <!-- opencv.js 는 그림이 있을 때 draft-guess.js 가 그때 읽는다 -->
+<script src="guess.js"></script>
+<script src="guess-run.js"></script>
+<script src="draft-guess.js"></script>
+<script src="auto-place.js"></script>  <!-- v0.9 자리 잡기 — 지우면 새 버튼은 왼쪽 위에 쌓인다 -->
+<script src="measure-key.info1.js"></script>  <!-- 5.0 측정 — 지우면 측정 기능만 사라짐 -->
+<script src="measure.js"></script>
+</body>
+</html>
