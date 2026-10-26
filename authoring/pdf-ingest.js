@@ -46,7 +46,7 @@ async function sha1Hex16(blob) {
 function shrink(src, w, h) {
   const c = document.createElement("canvas");
   c.width = w; c.height = h;
-  const g = c.getContext("2d");
+  const g = c.getContext("2d", { willReadFrequently: true });   // CPU 캔버스 (아래 big 과 같은 이유)
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
   g.drawImage(src, 0, 0, w, h);
   return c;
@@ -126,7 +126,9 @@ async function convert(file, opt) {
     const vp = page.getViewport({ scale: fit * RENDER_MARGIN });
     const big = document.createElement("canvas");
     big.width = Math.round(vp.width); big.height = Math.round(vp.height);
-    const g = big.getContext("2d", { alpha: false });
+    /* willReadFrequently = GPU 가속을 끈 CPU 캔버스. 2026-10-26 윈도 크롬에서 큰 캔버스(3450px)를 GPU 로 그리면
+       지면 오른쪽에 초록 사각형 조각이 찍히는 일이 있었다(그래픽 드라이버의 타일 오류). 조금 느려도 CPU 로 그린다 */
+    const g = big.getContext("2d", { alpha: false, willReadFrequently: true });
     g.fillStyle = "#fff"; g.fillRect(0, 0, big.width, big.height);
     await page.render({ canvasContext: g, viewport: vp }).promise;
     const baseC = shrink(big, bw, bh); release(big);
