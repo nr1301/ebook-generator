@@ -42,6 +42,10 @@ th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertic
 th{font-size:12.5px;color:var(--muted)}
 .note{background:var(--warnbg);border-left:3px solid var(--warn);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
 .scroll{overflow-x:auto}
+.samples td:first-child{white-space:nowrap;width:1%}
+.samples td:first-child .path{word-break:normal;font-size:11.5px;padding:1px 4px}
+.samples td{padding:7px 6px}
+.samples td:last-child{font-size:13.5px;white-space:nowrap}
 footer{color:var(--muted);font-size:13px;margin-top:24px}
 </style>
 </head>
@@ -66,14 +70,14 @@ footer{color:var(--muted);font-size:13px;margin-top:24px}
 <section>
   <h2>샘플 받기</h2>
   <p>체험용 샘플(중학 정보 1단원 교과서와 수업 자료 133개)은 미래엔 교과서·수업 자료라 <b>여기에 올리지 않았어요.</b> 사내 공유 폴더 <span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판</span> 안에 있어요. 아래 경로의 파일·폴더를 그대로 고르면 됩니다.</p>
-  <div class="scroll"><table>
+  <div class="scroll"><table class="samples">
     <tr><th>샘플 폴더</th><th>무엇인가</th></tr>
     <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\0_교과서_PDF</span></td><td>교과서 PDF (8–41쪽)</td></tr>
-    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\1_교과서_지면</span></td><td>위 PDF를 지면 이미지로 바꿔 둔 것. PDF 변환을 건너뛰고 싶을 때</td></tr>
-    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\2_자료_이름없음</span></td><td>수업 자료 133개, 이름을 <code>자료_001.hwp</code> 처럼 지워 둔 것 (체험 3)</td></tr>
-    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\3_자료_규칙이름</span></td><td>같은 자료, 이름 규칙대로 붙인 것 (체험 1·2)</td></tr>
-    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\4_완성본_정보1_1단원.ebproj.json</span></td><td>버튼 자리까지 다 잡아 둔 완성본 (체험 1)</td></tr>
-    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\정답표_자료_이름없음.xlsx</span></td><td>체험 3의 정답</td></tr>
+    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\1_교과서_지면</span></td><td>지면 이미지 (변환 건너뛰기용)</td></tr>
+    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\2_자료_이름없음</span></td><td>자료 133개 · 이름 지움 (체험 3)</td></tr>
+    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\3_자료_규칙이름</span></td><td>자료 133개 · 규칙 이름 (체험 1·2)</td></tr>
+    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\4_완성본_정보1_1단원.ebproj.json</span></td><td>완성본 (체험 1)</td></tr>
+    <tr><td><span class="path">X:\박나리 (323057)\[WM] e-book 생성기 체험판\샘플_중학정보1\정답표_자료_이름없음.xlsx</span></td><td>체험 3 정답</td></tr>
   </table></div>
   <p class="lede">자기 교과서 PDF와 자료 폴더로 해 봐도 됩니다. 아래 순서는 똑같아요.</p>
 </section>
